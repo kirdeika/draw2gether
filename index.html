@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            img {image-rendering: pixelated;}
+            /* div {
+                width: auto;
+                height: auto;
+                position: relative;
+                z-index: 0;
+            }
+
+            div::before {
+                z-index: 1;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                display: block;
+                content: " ";
+                background-image: linear-gradient(lightGray 2px, transparent 2px), linear-gradient(90deg, lightGray 2px, transparent 2px), linear-gradient(rgba(255, 255, 255, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.3) 1px, transparent 1px);
+                background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+                background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
+                animation: gridWipe 1s linear;
+            }
+
+            @keyframes gridWipe {
+            0% {
+                width: 0px;
+                height: 0px;
+            }
+
+            100% {
+                width: 100%;
+                height: 100%;
+            }
+            } */
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    </head>
+    <body>
+        <button>Upd</button>
+        <div id="grid">
+            <img src="" alt="" draggable="false">
+            <canvas width="500" height="500"></canvas>
+        </div>
+        <script>
+            var dataString = '';
+            sendPostCoords([0, 0]);
+
+            var updateInterval = setInterval(getUpdatedInfo, 1000);
+
+            function updateImage(baseData) {
+                $('img').attr('src', baseData);
+                // var canvas = document.querySelector("canvas");
+                // var ctx = canvas.getContext("2d");
+
+                // var image = new Image();
+                // image.onload = function() {
+                //     ctx.drawImage(image, 0, 0);
+                // };
+                // image.src = baseData;
+            }
+            
+            $('img').click(function (e){
+                var elm = $(this);
+                var xPos = Math.round(e.pageX - elm.offset().left);
+                var yPos = Math.round(e.pageY - elm.offset().top);
+
+                sendPostCoords([xPos, yPos]);
+                console.log(xPos, yPos);
+            });
+
+            function getUpdatedInfo() {
+                var url = "/.netlify/functions/hello"
+                $.get(url, function(data) {
+                    dataString = 'data:image/png;base64,' + data;
+                    console.log('update')
+                    updateImage(dataString);
+                });
+            }
+
+            function sendPostCoords(coords) {
+                var url = "/.netlify/functions/hello";
+                $.post(url,JSON.stringify({
+                        X: coords[0],
+                        Y: coords[1],
+                        R: 255,
+                        G: 0,
+                        B: 0,
+                        }), 
+                    function(returnedData){
+                        console.log(returnedData);
+                        dataString = 'data:image/png;base64,' + returnedData;
+                        updateImage(dataString);
+                });
+            }
+        </script>
+    </body>
+</html>
